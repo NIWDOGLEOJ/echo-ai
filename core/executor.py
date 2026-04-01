@@ -2,6 +2,28 @@ import os
 import pyautogui
 import subprocess
 
+from memory.session import (
+    store_closed,
+    get_last_closed,
+    get_last_session,
+    get_favorites,
+    get_common
+)
+
+from memory.modes import enter_mode, exit_mode
+
+
+def get_running_apps():
+
+    script = '''
+    osascript -e 'tell application "System Events" to get name of (processes where background only is false)'
+    '''
+
+    result = subprocess.getoutput(script)
+    apps = [a.strip() for a in result.split(",")]
+
+    return apps
+
 
 def execute(action):
 
@@ -51,7 +73,7 @@ def execute(action):
     elif act == "open_url":
         subprocess.Popen(["open", value])
 
-    # CLOSE ALL (SAFE)
+    # CLOSE ALL (SAFE + STORE)
     elif act == "close_all":
 
         protected = [
@@ -66,12 +88,9 @@ def execute(action):
             "Dock",
         ]
 
-        script = '''
-        osascript -e 'tell application "System Events" to get name of (processes where background only is false)'
-        '''
+        apps = get_running_apps()
 
-        result = subprocess.getoutput(script)
-        apps = [a.strip() for a in result.split(",")]
+        close_list = []
 
         for app in apps:
 
@@ -84,11 +103,72 @@ def execute(action):
             if skip:
                 continue
 
+            close_list.append(app)
+
             subprocess.Popen(
                 ["osascript", "-e", f'tell application "{app}" to quit']
             )
 
             print(f"Closing {app}")
+
+        store_closed(close_list)
+
+    # START ALL APPS
+    elif act == "start_all":
+
+        apps = get_last_closed()
+
+        for app in apps:
+            subprocess.Popen(["open", "-a", app])
+            print(f"Opening {app}")
+
+    # RESTORE SESSION
+    elif act == "restore_session":
+
+        apps = get_last_session()
+
+        for app in apps:
+            subprocess.Popen(["open", "-a", app])
+            print(f"Restoring {app}")
+
+    # OPEN FAVORITES
+    elif act == "open_favorites":
+
+        apps = get_favorites()
+
+        for app in apps:
+            subprocess.Popen(["open", "-a", app])
+            print(f"Opening {app}")
+
+    # OPEN COMMON
+    elif act == "open_common":
+
+        apps = get_common()
+
+        for app in apps:
+            subprocess.Popen(["open", "-a", app])
+            print(f"Opening {app}")
+
+    # ENTER MODE
+    elif act == "mode":
+
+        running = get_running_apps()
+        apps = enter_mode(value, running)
+
+        if apps:
+            for app in apps:
+                subprocess.Popen(["open", "-a", app])
+                print(f"Opening {app}")
+
+    # EXIT MODE
+    elif act == "exit_mode":
+
+        apps = exit_mode()
+
+        if apps:
+            for app in apps:
+                subprocess.Popen(["open", "-a", app])
+                print(f"Restoring {app}")
 
     else:
         print("Unknown action:", action)
