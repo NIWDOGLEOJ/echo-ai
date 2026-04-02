@@ -16,3 +16,9 @@ venv/
 
 # logs
 *.log
+
+venv/
+__pycache__/
+*.pyc
+memory/*.json
+.DS_Store

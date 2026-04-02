@@ -152,11 +152,32 @@ def execute(action):
     # ENTER MODE
     elif act == "mode":
 
+        # capture current apps BEFORE closing
         running = get_running_apps()
+
+        # close everything first
+        execute({"action": "close_all"})
+
         apps = enter_mode(value, running)
 
         if apps:
             for app in apps:
+
+                # private safari window
+                if app == "__PRIVATE_SAFARI__":
+                    os.system(
+                        'osascript -e \'tell application "Safari" to activate\' '
+                        '-e \'tell application "System Events" to keystroke "n" using {command down, shift down}\''
+                    )
+                    print("Opening Safari Private Window")
+                    continue
+
+                # open Games app (exact name handling)
+                if app.lower() == "games":
+                    subprocess.Popen(["open", "-a", "Games"])
+                    print("Opening Games")
+                    continue
+
                 subprocess.Popen(["open", "-a", app])
                 print(f"Opening {app}")
 

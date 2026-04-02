@@ -3,15 +3,15 @@ from memory.session import store_session, get_last_session
 MODES = {
 
     "development": [
-        "Visual Studio Code",
         "Terminal",
-        "Safari"
+        "Safari",
+        "Finder"
     ],
 
     "editing": [
-        "DaVinci Resolve",
         "Music",
-        "Finder"
+        "Finder",
+        "Safari"
     ],
 
     "learning": [
@@ -20,12 +20,14 @@ MODES = {
         "Music"
     ],
 
+    # open Games app
     "game": [
-        "Steam"
+        "Games"
     ],
 
+    # special keyword handled by executor
     "private": [
-        "Safari"
+        "__PRIVATE_SAFARI__"
     ]
 }
 
